@@ -14,7 +14,7 @@
     "command-center-auth": "./dist/bin/install-auth-kit.js"
   },
   "publishConfig": {
-    "access": "restricted",
+    "access": "public",
     "provenance": true
   },
   "files": [
