@@ -1,11 +1,21 @@
 {
-  "name": "@command-center/auth-kit",
+  "name": "@curiousnwbldr/finance-command-center-auth",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "module",
-  "description": "Reusable Okta/Auth.js starter kit for command-center style Next.js applications.",
+  "description": "Reusable Okta/Auth.js starter kit for finance command-center style Next.js applications.",
+  "packageManager": "pnpm@10.30.3",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/curiousnwbldr/finance-command-center.git"
+  },
   "bin": {
+    "finance-command-center-auth": "./dist/bin/install-auth-kit.js",
     "command-center-auth": "./dist/bin/install-auth-kit.js"
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "provenance": true
   },
   "files": [
     "dist",

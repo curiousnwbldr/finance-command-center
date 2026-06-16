@@ -20,6 +20,7 @@ function parseProvider(value: string | undefined): ProviderMode {
 function usage(): string {
   return `
 Usage:
+  finance-command-center-auth install --target <path> [options]
   command-center-auth install --target <path> [options]
 
 Options:

@@ -50,7 +50,7 @@ That separation matters. Authentication answers “who is this user?” App auth
 ## Package Layout
 
 ```text
-command-center-auth-kit/
+finance-command-center-auth/
   package.json
   pnpm-lock.yaml
   tsconfig.json
@@ -82,7 +82,8 @@ Defines the package name, build scripts, dependencies, peer dependencies, and CL
 
 Important fields:
 
-- `bin.command-center-auth`: points to the built installer CLI.
+- `bin.finance-command-center-auth`: primary CLI command exposed by the package.
+- `bin.command-center-auth`: compatibility CLI alias for shorter internal usage.
 - `dependencies.next-auth`: the generated app uses Auth.js/NextAuth.
 - `peerDependencies.next`, `react`, `react-dom`: the target app must already be a Next/React app.
 
@@ -99,7 +100,7 @@ The CLI entry point.
 It parses commands such as:
 
 ```bash
-command-center-auth install --target /path/to/app --app-name "Finance Command Center"
+finance-command-center-auth install --target /path/to/app --app-name "Finance Command Center"
 ```
 
 Supported options:
@@ -157,7 +158,7 @@ Exports the installer and public types for programmatic usage.
 This allows a future repo or script to import:
 
 ```ts
-import { installAuthKit } from "@command-center/auth-kit"
+import { installAuthKit } from "@curiousnwbldr/finance-command-center-auth"
 ```
 
 ## Generated Target Files
@@ -405,6 +406,23 @@ pnpm install
 pnpm build
 ```
 
+Use from the published package:
+
+```bash
+pnpm dlx @curiousnwbldr/finance-command-center-auth install \
+  --target /path/to/next-app \
+  --app-name "Finance Command Center" \
+  --provider okta \
+  --dashboard-path /dashboard
+```
+
+Install into a target app as a dependency:
+
+```bash
+pnpm add @curiousnwbldr/finance-command-center-auth
+pnpm exec finance-command-center-auth install --target . --app-name "Finance Command Center"
+```
+
 Install into a target app:
 
 ```bash
@@ -438,6 +456,41 @@ Overwrite existing generated files:
 node dist/bin/install-auth-kit.js install \
   --target /path/to/next-app \
   --force
+```
+
+## Publishing A Verified Package
+
+This package is configured for npm trusted publishing and provenance under:
+
+```text
+@curiousnwbldr/finance-command-center-auth
+```
+
+To publish it as a verified package:
+
+1. Confirm the npm scope `@curiousnwbldr` is owned by the right user or organization.
+2. In npm package settings, configure GitHub Actions as the trusted publisher for this repository.
+3. Use workflow file `publish.yml`.
+4. Create and push a version tag, for example `v0.1.0`.
+5. The GitHub workflow builds the package and runs `npm publish`.
+
+The package uses:
+
+```json
+{
+  "publishConfig": {
+    "access": "restricted",
+    "provenance": true
+  }
+}
+```
+
+Use `"access": "public"` instead if this should be installable outside the npm organization. For private/restricted packages, consuming teams need access to the npm scope and must authenticate their package manager to npm.
+
+After publishing, consumers can verify registry signatures and attestations with:
+
+```bash
+npm audit signatures
 ```
 
 ## Recommended Team Workflow
