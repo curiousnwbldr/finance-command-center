@@ -1,0 +1,41 @@
+import { auth } from "@/auth"
+import { NextResponse } from "next/server"
+
+const PUBLIC_ASSET_PATHS = new Set([
+  "/favicon.ico",
+])
+
+export default auth((req) => {
+  const { pathname } = req.nextUrl
+  const isLoggedIn = Boolean(req.auth?.user?.email)
+  const isActive = req.auth?.user?.isActive !== false
+
+  if (pathname.startsWith("/_next") || PUBLIC_ASSET_PATHS.has(pathname)) {
+    return NextResponse.next()
+  }
+
+  if (pathname.startsWith("/api/auth/")) {
+    return NextResponse.next()
+  }
+
+  if (pathname === "/login") {
+    if (isLoggedIn && isActive) {
+      return NextResponse.redirect(new URL("{{DASHBOARD_PATH}}", req.url))
+    }
+    return NextResponse.next()
+  }
+
+  if (!isLoggedIn) {
+    return NextResponse.redirect(new URL("/login", req.url))
+  }
+
+  if (!isActive) {
+    return NextResponse.redirect(new URL("/login?error=AccessDenied", req.url))
+  }
+
+  return NextResponse.next()
+}) as any
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+}

@@ -1,0 +1,73 @@
+"use client"
+
+import { Suspense, useState } from "react"
+import { signIn, signOut, useSession } from "next-auth/react"
+import { useSearchParams } from "next/navigation"
+
+function LoginContent() {
+  const { data: session } = useSession()
+  const searchParams = useSearchParams()
+  const error = searchParams.get("error")
+  const [loading, setLoading] = useState<"okta" | "auth0" | null>(null)
+  const oktaEnabled = process.env.NEXT_PUBLIC_OKTA_ENABLED === "true"
+  const auth0Enabled = process.env.NEXT_PUBLIC_AUTH0_ENABLED === "true"
+
+  async function startSignIn(provider: "okta" | "auth0") {
+    setLoading(provider)
+    try {
+      if (session?.user?.provider && session.user.provider !== provider) {
+        await signOut({ redirect: false })
+      }
+      await signIn(provider, { redirectTo: "{{DASHBOARD_PATH}}" }, { prompt: "login" })
+    } catch {
+      setLoading(null)
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-neutral-950 text-white flex items-center justify-center p-6">
+      <section className="w-full max-w-md rounded-2xl border border-white/10 bg-neutral-900 p-8 shadow-2xl">
+        <div className="mb-8">
+          <div className="text-2xl font-semibold">{{APP_NAME}}</div>
+          <p className="mt-2 text-sm text-neutral-400">Sign in with your organization account.</p>
+        </div>
+
+        {error ? (
+          <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
+            Authentication could not be completed. Contact your administrator if this continues.
+          </div>
+        ) : null}
+
+        <div className="space-y-3">
+          <button
+            type="button"
+            disabled={!oktaEnabled || loading !== null}
+            onClick={() => startSignIn("okta")}
+            className="w-full rounded-xl border border-white/10 bg-white px-4 py-3 text-left text-sm font-medium text-neutral-950 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading === "okta" ? "Redirecting to Okta..." : "Continue with Okta"}
+          </button>
+
+          {auth0Enabled ? (
+            <button
+              type="button"
+              disabled={loading !== null}
+              onClick={() => startSignIn("auth0")}
+              className="w-full rounded-xl border border-white/10 bg-neutral-800 px-4 py-3 text-left text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading === "auth0" ? "Redirecting..." : "Continue with Auth0"}
+            </button>
+          ) : null}
+        </div>
+      </section>
+    </main>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
+  )
+}

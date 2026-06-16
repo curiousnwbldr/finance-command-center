@@ -1,0 +1,32 @@
+{
+  "name": "@command-center/auth-kit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reusable Okta/Auth.js starter kit for command-center style Next.js applications.",
+  "bin": {
+    "command-center-auth": "./dist/bin/install-auth-kit.js"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "install:example": "node dist/bin/install-auth-kit.js install --target ./example-app --app-name \"Example Command Center\" --provider okta"
+  },
+  "dependencies": {
+    "next-auth": "^5.0.0-beta.30"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "next": ">=15",
+    "react": ">=18",
+    "react-dom": ">=18"
+  }
+}
