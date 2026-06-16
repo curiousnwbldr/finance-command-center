@@ -312,6 +312,37 @@ If the target app does not use Tailwind-style utility classes, the generated log
 
 ## Okta Setup
 
+This kit requires an Okta OIDC application/client before a target app can use Okta sign-in.
+
+For production use, ask the IT / IAM team to create and own the Okta application. Developers should not reuse a personal Okta client, a Polaris client, or a client from another app unless IT has explicitly approved that shared model.
+
+Recommended operating model:
+
+- Create a separate Okta OIDC application per app and environment, for example:
+  - `Finance Command Center - Dev`
+  - `Finance Command Center - Preview`
+  - `Finance Command Center - Production`
+- Assign ownership to the IT / IAM team or the platform identity owner.
+- Restrict app assignment to the correct Okta groups.
+- Store client secrets only in the deployment platform or secret manager.
+- Rotate client secrets through IT change control.
+- Document the redirect URIs and app owner in the target app runbook.
+
+Why separate Okta clients are recommended:
+
+- each app has its own redirect URIs
+- compromised secrets can be rotated without affecting other apps
+- production access can be controlled independently from dev/preview access
+- audit logs map cleanly to the consuming app
+- decommissioning an app does not disturb unrelated applications
+
+When a shared Okta client may be acceptable:
+
+- the organization has a true central command-center identity app
+- all downstream apps rely on a command-center-issued session or token
+- IT has approved all redirect URIs, token claims, and access boundaries
+- app teams understand that rotating the shared secret impacts every consumer
+
 In Okta, create or update an OIDC web application.
 
 Recommended settings:
@@ -534,4 +565,3 @@ Then manually merge the generated route-guard logic into the target app’s exis
 ## Current Status
 
 This is a starter kit scaffold. It has been build-tested and smoke-tested locally, but it should still go through normal security review before being used broadly across production apps.
-
