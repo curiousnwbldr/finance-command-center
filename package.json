@@ -4,6 +4,18 @@
   "private": false,
   "type": "module",
   "description": "Reusable Okta/Auth.js starter kit for finance command-center style Next.js applications.",
+  "license": "MIT",
+  "keywords": [
+    "nextjs",
+    "authjs",
+    "next-auth",
+    "okta",
+    "auth0",
+    "starter-kit",
+    "authentication",
+    "command-center",
+    "finance"
+  ],
   "packageManager": "pnpm@10.30.3",
   "repository": {
     "type": "git",
