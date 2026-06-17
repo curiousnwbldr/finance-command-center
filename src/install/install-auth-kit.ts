@@ -10,6 +10,8 @@ type TemplateFile = {
   destination: string
 }
 
+type ResolvedInstallOptions = Required<InstallOptions>
+
 const TEMPLATE_FILES: TemplateFile[] = [
   { template: "auth.ts.hbs", destination: "auth.ts" },
   { template: "app/login/page.tsx.hbs", destination: "app/login/page.tsx" },
@@ -31,11 +33,32 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
-function toTemplateContext(options: InstallOptions): TemplateContext {
+function resolveInstallOptions(options: InstallOptions): ResolvedInstallOptions {
+  return {
+    target: options.target,
+    appName: options.appName ?? "Command Center",
+    provider: options.provider ?? "okta",
+    dashboardPath: options.dashboardPath ?? "/dashboard",
+    force: options.force ?? false,
+    includeProxy: options.includeProxy ?? true,
+  }
+}
+
+function toTemplateContext(options: ResolvedInstallOptions): TemplateContext {
+  const providerLabels: Record<ResolvedInstallOptions["provider"], string> = {
+    okta: "Okta",
+    auth0: "Auth0",
+    both: "Okta and Auth0",
+  }
+
   return {
     appName: options.appName,
     provider: options.provider,
+    providerLabel: providerLabels[options.provider],
     dashboardPath: options.dashboardPath,
+    proxyGenerated: options.includeProxy ? "Yes" : "No",
+    proxyFileLine: options.includeProxy ? "- proxy.ts" : "",
+    installDate: new Date().toISOString().slice(0, 10),
     oktaEnabledDefault: options.provider === "okta" || options.provider === "both" ? "true" : "false",
     auth0EnabledDefault: options.provider === "auth0" || options.provider === "both" ? "true" : "false",
   }
@@ -44,7 +67,12 @@ function toTemplateContext(options: InstallOptions): TemplateContext {
 function asRecord(context: TemplateContext): Record<string, string> {
   return {
     APP_NAME: context.appName,
+    PROVIDER_LABEL: context.providerLabel,
+    PROVIDER_MODE: context.provider,
     DASHBOARD_PATH: context.dashboardPath,
+    PROXY_GENERATED: context.proxyGenerated,
+    PROXY_FILE_LINE: context.proxyFileLine,
+    INSTALL_DATE: context.installDate,
     OKTA_ENABLED_DEFAULT: context.oktaEnabledDefault,
     AUTH0_ENABLED_DEFAULT: context.auth0EnabledDefault,
   }
@@ -87,14 +115,17 @@ async function appendEnvExample(targetRoot: string, templatesRoot: string, conte
 }
 
 export async function installAuthKit(options: InstallOptions): Promise<void> {
-  const targetRoot = resolve(options.target)
+  const resolvedOptions = resolveInstallOptions(options)
+  const targetRoot = resolve(resolvedOptions.target)
   const templatesRoot = join(packageRoot(), "templates/next-app-router")
-  const context = asRecord(toTemplateContext(options))
+  const context = asRecord(toTemplateContext(resolvedOptions))
   const files = [...TEMPLATE_FILES]
 
-  if (options.includeProxy) {
+  if (resolvedOptions.includeProxy) {
     files.push({ template: "proxy.ts.hbs", destination: "proxy.ts" })
   }
+
+  files.push({ template: "AUTH_SETUP_HANDOFF.md.hbs", destination: "AUTH_SETUP_HANDOFF.md" })
 
   await mkdir(targetRoot, { recursive: true })
 
@@ -104,7 +135,7 @@ export async function installAuthKit(options: InstallOptions): Promise<void> {
       targetRoot,
       file,
       context,
-      force: options.force,
+      force: resolvedOptions.force,
     })
     console.log(`${status.padEnd(11)} ${file.destination}`)
   }

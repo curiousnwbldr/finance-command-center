@@ -40,7 +40,7 @@ Do not use this skill when:
 
 Tell the user:
 
-> I can add the standard command-center authentication scaffold to this app. I will create login and Auth.js files, update `.env.example`, create the app-owner handoff document, and show you the exact environment variables your IT/IAM team needs to provide.
+> I can add the standard command-center authentication scaffold to this app. I will run the installer to create the login and Auth.js files, update `.env.example`, generate the app-owner handoff document, and show you the exact environment variables your IT/IAM team needs to provide.
 
 Avoid exposing unnecessary terminal details to non-developer users. Explain the outcome, not every command, unless they ask.
 
@@ -186,6 +186,7 @@ The installer creates or appends the following authentication files:
 - `app/api/auth/[...nextauth]/route.ts`
 - `app/types/next-auth.d.ts`
 - `proxy.ts`
+- `AUTH_SETUP_HANDOFF.md`
 - `.env.example`
 
 Expected installer output should resemble:
@@ -196,12 +197,11 @@ created app/login/page.tsx
 created app/api/auth/[...nextauth]/route.ts
 created app/types/next-auth.d.ts
 created proxy.ts
+created AUTH_SETUP_HANDOFF.md
 appended .env.example
 ```
 
-After installation, the agent must also create:
-
-- `AUTH_SETUP_HANDOFF.md`
+The installer generates `AUTH_SETUP_HANDOFF.md` automatically. The agent must verify it exists and populate any additional known values that were not available to the installer.
 
 ## Environment Variables
 
@@ -292,13 +292,13 @@ Do not reuse Okta clients from unrelated apps unless IT/IAM explicitly approves.
 
 ## Required App Owner Handoff
 
-After installing the auth kit, create `AUTH_SETUP_HANDOFF.md` in the target repository.
+The installer generates `AUTH_SETUP_HANDOFF.md` in the target repository.
 
 The handoff document is intended for non-developer app owners, IT/IAM teams, deployment owners, and reviewers.
 
-Its purpose is not to instruct the non-developer user to run the installer. The agent performs the installation. The handoff document is the final closeout artifact that clearly lists what remains open and which manual setup steps must still be completed before the app is ready for production use.
+Its purpose is not to instruct the non-developer user to run the installer. The handoff document is the final closeout artifact that clearly lists what remains open and which manual setup steps must still be completed before the app is ready for production use.
 
-It must summarize:
+The generated document must summarize:
 
 - what changed
 - what files were created
@@ -311,118 +311,18 @@ It must summarize:
 
 Do not include real secrets in this document.
 
-### Handoff Document Structure
-
-Create `AUTH_SETUP_HANDOFF.md` with this structure:
-
-```markdown
-# Authentication Setup Handoff
-
-## Summary
-
-Authentication scaffolding has been added to this app using the Command Center Auth Kit.
-
-The app now includes Auth.js / NextAuth configuration, Okta provider setup, a login page, an authentication route handler, session/JWT type augmentation, route protection, and example environment variables.
-
-This setup adds authentication only. App-specific authorization, roles, permissions, user provisioning, and audit logging still need to be connected by the app team.
-
-## Open Manual Setup Items
-
-The agent has completed the code installation. The following items still require app owner, IT/IAM, deployment owner, or security review action. Items marked `Open` block production use until completed.
-
-| Item | Owner | Status | Notes |
-| --- | --- | --- | --- |
-| Okta OIDC app/client | IT/IAM | `Open` | Create or confirm the Okta web app and provide the required Okta values. |
-| Okta user/group assignment | IT/IAM / app owner | `Open` | Assign the approved users or groups that may access this app. |
-| Deployment environment variables | Deployment owner | `Open` | Configure the required variables listed below in the deployment platform or secret manager. |
-| Production app URL | Deployment owner | `Open` | Confirm `NEXTAUTH_URL` and deployed redirect/sign-out URLs match the production host. |
-| Local or staging validation | App/deployment owner | `Open` | Confirm login, callback, redirect, and protected-route behavior. |
-| App-specific authorization | App team | `Open` | Connect roles, permissions, user provisioning, inactive-user handling, and audit logging as needed. |
-| Security review | Security/app owner | `Open` | Confirm secret handling, API authorization, and production readiness. |
-
-## Files Added Or Updated
-
-List the files from the generated files section of this skill.
-
-## Decisions Used During Setup
-
-| Item | Value |
-| --- | --- |
-| App name | `<APP_NAME>` |
-| Provider | `<PROVIDER>` |
-| Post-login route | `<DASHBOARD_PATH>` |
-| Proxy generated | `<YES_OR_NO>` |
-| Installed by | `<AGENT_OR_PERSON>` |
-| Install date | `<DATE>` |
-
-## Information Needed From IT / IAM
-
-Ask IT/IAM to create or confirm an Okta OIDC web application for this app. Include the Okta values, owners, redirect URIs, sign-out URIs, assigned groups/users, and production approval status from the Okta setup requirements section.
-
-## Environment Variables To Configure
-
-Include the environment variable table from this skill. Keep placeholders for unknown values and never include real secrets.
-
-## Deployment Checklist
-
-- Okta app created by IT/IAM.
-- Okta redirect URI matches deployed app callback URL.
-- Okta sign-out URI matches deployed app login URL.
-- Required users/groups assigned in Okta.
-- Environment variables added to deployment platform.
-- Secrets stored only in secret manager or deployment platform.
-- `.env.example` contains placeholders only.
-- App builds successfully.
-- `/login` page loads.
-- Okta sign-in completes successfully.
-- User lands on the expected post-login page.
-- Unauthenticated users are redirected to `/login`.
-- Existing public routes still work.
-- Existing API routes still perform authorization checks.
-
-## App Team Follow-Up
-
-Review and connect the generated auth extension hooks to the app's user profile, entitlement, role, or audit systems as needed.
-
-## Security Notes
-
-Use the security rules from this skill.
-
-## Validation Commands
-
-Use the validation commands from this skill and record which checks passed, failed, or were unavailable.
-
-## Status
-
-| Item | Status |
-| --- | --- |
-| Auth scaffold installed | `<DONE_OR_PENDING>` |
-| IT/IAM values collected | `<DONE_OR_PENDING>` |
-| Environment variables configured | `<DONE_OR_PENDING>` |
-| Local validation completed | `<DONE_OR_PENDING>` |
-| Production validation completed | `<DONE_OR_PENDING>` |
-| Security review completed | `<DONE_OR_PENDING>` |
-
-Use `Done` only for items the agent actually completed or verified. Use `Open` for manual items still waiting on IT/IAM, deployment owner, app owner, app team, or security review.
-```
-
 ### Handoff Agent Requirements
 
 The agent must:
 
-1. Create `AUTH_SETUP_HANDOFF.md` after installation.
-2. Replace placeholders where known.
-3. Leave unknown values as clear placeholders.
+1. Verify `AUTH_SETUP_HANDOFF.md` was generated by the installer.
+2. Populate any additional known values that were not available to the installer.
+3. Leave unknown values as clear placeholders or `Open` manual items.
 4. Never insert real secrets.
-5. Mention that IT/IAM must provide Okta values.
-6. Mention that app-specific authorization is not completed by this kit.
-7. Include an `Open Manual Setup Items` section near the top.
-8. Mark unresolved manual setup items as `Open`.
-9. Include the generated files list.
-10. Include validation commands.
-11. Include a production readiness checklist.
+5. Confirm that IT/IAM ownership, deployment environment variables, app-specific authorization, validation, and security review remain clearly identified.
+6. Check for unresolved template placeholders before closeout.
 
-If the user is non-technical, summarize the handoff document in plain English after creating it.
+If the user is non-technical, summarize the handoff document in plain English after verifying it.
 
 ## App Team Follow-Up
 
@@ -463,11 +363,10 @@ find . -maxdepth 5 -type f \( \
 Check for unresolved template placeholders:
 
 ```bash
-grep -R "{{" auth.ts app proxy.ts .env.example AUTH_SETUP_HANDOFF.md 2>/dev/null || true
-grep -R "}}" auth.ts app proxy.ts .env.example AUTH_SETUP_HANDOFF.md 2>/dev/null || true
+grep -R -E '[{][{]|[}][}]' auth.ts app proxy.ts .env.example AUTH_SETUP_HANDOFF.md 2>/dev/null || true
 ```
 
-Expected result: no output from the grep commands.
+Expected result: no output from the grep command.
 
 Run type/build checks using the target repo’s scripts. Inspect `package.json` first:
 
@@ -624,7 +523,7 @@ Always:
 4. Check for existing auth files.
 5. Install peer dependencies if missing.
 6. Run the installer.
-7. Create or confirm `AUTH_SETUP_HANDOFF.md`.
+7. Confirm the installer generated `AUTH_SETUP_HANDOFF.md`.
 8. Validate generated files.
 9. Check for unresolved template placeholders.
 10. Run available build/type/lint checks.
@@ -651,7 +550,7 @@ For a clean pnpm Next.js App Router app:
 Authentication setup is considered complete only when all of the following are true:
 
 - Auth scaffolding installed successfully.
-- `AUTH_SETUP_HANDOFF.md` created.
+- `AUTH_SETUP_HANDOFF.md` generated by the installer.
 - No unresolved template placeholders remain.
 - Build succeeds.
 - Typecheck succeeds, if available.

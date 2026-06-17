@@ -1,0 +1,198 @@
+# Authentication Setup Handoff
+
+## Summary
+
+Authentication scaffolding has been added to this app using the Command Center Auth Kit.
+
+The app now includes:
+
+- Auth.js / NextAuth configuration
+- {{PROVIDER_LABEL}} provider setup
+- login page
+- authentication route handler
+- session/JWT type augmentation
+- route protection
+- example environment variables
+
+This setup adds authentication only. App-specific authorization, roles, permissions, user provisioning, and audit logging still need to be connected by the app team.
+
+## Open Manual Setup Items
+
+| Item | Owner | Status | Notes |
+| --- | --- | --- | --- |
+| {{PROVIDER_LABEL}} OIDC app/client | IT/IAM | Open | Create or confirm the identity provider web app and provide the required values. |
+| User/group assignment | IT/IAM / app owner | Open | Assign the approved users or groups that may access this app. |
+| Deployment environment variables | Deployment owner | Open | Configure the required variables in the deployment platform or secret manager. |
+| Production app URL | Deployment owner | Open | Confirm NEXTAUTH_URL and deployed redirect/sign-out URLs match the production host. |
+| Local or staging validation | App/deployment owner | Open | Confirm login, callback, redirect, and protected-route behavior. |
+| App-specific authorization | App team | Open | Connect roles, permissions, user provisioning, inactive-user handling, and audit logging as needed. |
+| Security review | Security/app owner | Open | Confirm secret handling, API authorization, and production readiness. |
+
+## Files Added Or Updated
+
+- auth.ts
+- app/login/page.tsx
+- app/api/auth/[...nextauth]/route.ts
+- app/types/next-auth.d.ts
+{{PROXY_FILE_LINE}}- .env.example
+- AUTH_SETUP_HANDOFF.md
+
+## Decisions Used During Setup
+
+| Item | Value |
+| --- | --- |
+| App name | {{APP_NAME}} |
+| Provider | {{PROVIDER_MODE}} |
+| Post-login route | {{DASHBOARD_PATH}} |
+| Proxy generated | {{PROXY_GENERATED}} |
+| Installed by | Command Center Auth Kit |
+| Install date | {{INSTALL_DATE}} |
+
+## Information Needed From IT / IAM
+
+Ask IT/IAM to create or confirm an OIDC web application for this app.
+
+Required from IT/IAM:
+
+| Item | Needed Value |
+| --- | --- |
+| Client ID | Provider client ID |
+| Client secret | Provider client secret |
+| Issuer URL | Provider issuer URL |
+| Assigned users/groups | Group or assignment list |
+| App owner | Person/team responsible |
+| Secret rotation owner | Person/team responsible |
+| Production approval | Required before production use |
+
+Recommended Okta redirect URI:
+
+```text
+https://<APP_HOST>/api/auth/callback/okta
+```
+
+Recommended local development redirect URI:
+
+```text
+http://localhost:3000/api/auth/callback/okta
+```
+
+Recommended sign-out URI:
+
+```text
+https://<APP_HOST>/login
+```
+
+Recommended scopes:
+
+```text
+openid profile email
+```
+
+## Environment Variables To Configure
+
+Do not commit real values to Git.
+
+| Variable | Required | Owner | Notes |
+| --- | --- | --- | --- |
+| AUTH_SECRET | Yes | App/deployment owner | Generate a strong random value. |
+| NEXTAUTH_SECRET | Yes | App/deployment owner | Can match AUTH_SECRET if the app standard allows. |
+| NEXTAUTH_URL | Yes | App/deployment owner | Must match deployed app origin. |
+| OKTA_ENABLED | If using Okta | App/deployment owner | Usually true. |
+| NEXT_PUBLIC_OKTA_ENABLED | If using Okta | App/deployment owner | Usually true; controls login button visibility. |
+| OKTA_CLIENT_ID | If using Okta | IT/IAM | From Okta OIDC app. |
+| OKTA_CLIENT_SECRET | If using Okta | IT/IAM | Secret value from Okta. |
+| OKTA_ISSUER | If using Okta | IT/IAM | Example: https://your-org.okta.com |
+| AUTH0_ENABLED | If using Auth0 | App/deployment owner | Usually true. |
+| NEXT_PUBLIC_AUTH0_ENABLED | If using Auth0 | App/deployment owner | Usually true; controls login button visibility. |
+| AUTH0_CLIENT_ID | If using Auth0 | IT/IAM | From Auth0 application. |
+| AUTH0_CLIENT_SECRET | If using Auth0 | IT/IAM | Secret value from Auth0. |
+| AUTH0_ISSUER | If using Auth0 | IT/IAM | Auth0 issuer URL. |
+
+Generate a local secret with:
+
+```bash
+openssl rand -base64 32
+```
+
+## Deployment Checklist
+
+- [ ] Identity provider app created by IT/IAM
+- [ ] Redirect URI matches deployed app callback URL
+- [ ] Sign-out URI matches deployed app login URL
+- [ ] Required users/groups assigned
+- [ ] Environment variables added to deployment platform
+- [ ] Secrets stored only in secret manager or deployment platform
+- [ ] .env.example contains placeholders only
+- [ ] App builds successfully
+- [ ] /login page loads
+- [ ] Sign-in completes successfully
+- [ ] User lands on the expected post-login page
+- [ ] Unauthenticated users are redirected to /login
+- [ ] Existing public routes still work
+- [ ] Existing API routes still perform authorization checks
+
+## App Team Follow-Up
+
+Review and connect the generated auth extension hooks in auth.ts:
+
+- onUserSignIn
+- loadUserProfile
+- buildSessionClaims
+
+Required app-team decisions:
+
+- Where is the user profile stored?
+- How are inactive users identified?
+- What roles or entitlements should be added to the session?
+- Should login events be written to an audit log?
+- Which pages should be public?
+- Which pages require authentication?
+- Which API routes require authorization checks?
+
+## Security Notes
+
+This setup provides authentication scaffolding. It does not provide complete app authorization.
+
+Important:
+
+- Never commit provider secrets.
+- Keep secrets out of client-side variables.
+- Do not put sensitive permissions or broad entitlements into client-readable session fields.
+- Keep API authorization checks separate from route-level login checks.
+- Review generated files before production use.
+- Rotate provider client secrets according to IT policy.
+
+## Validation Commands
+
+Developers can run:
+
+```bash
+pnpm build
+```
+
+If available:
+
+```bash
+pnpm typecheck
+pnpm lint
+```
+
+Check for unresolved template placeholders:
+
+```bash
+grep -R -E '[{][{]|[}][}]' auth.ts app proxy.ts .env.example AUTH_SETUP_HANDOFF.md 2>/dev/null || true
+```
+
+Expected result: no output.
+
+## Status
+
+| Item | Status |
+| --- | --- |
+| Auth scaffold installed | Done |
+| Handoff document created | Done |
+| IT/IAM values collected | Open |
+| Environment variables configured | Open |
+| Local validation completed | Open |
+| Production validation completed | Open |
+| Security review completed | Open |

@@ -11,8 +11,7 @@ Generate authentication scaffolding for a Next.js App Router application:
 ```bash
 pnpm dlx @curiousnwbldr/finance-command-center-auth install \
   --target ./my-app \
-  --app-name "Finance Command Center" \
-  --provider okta
+  --app-name "Finance Command Center"
 ```
 
 Or with npm:
@@ -20,9 +19,10 @@ Or with npm:
 ```bash
 npx @curiousnwbldr/finance-command-center-auth install \
   --target ./my-app \
-  --app-name "Finance Command Center" \
-  --provider okta
+  --app-name "Finance Command Center"
 ```
+
+Okta is the default provider. Use `--provider auth0` or `--provider both` when the target app should use a different provider setup.
 
 ### Programmatic Usage
 
@@ -93,6 +93,7 @@ finance-command-center-auth/
       types.ts
   templates/
     next-app-router/
+      AUTH_SETUP_HANDOFF.md.hbs
       auth.ts.hbs
       proxy.ts.hbs
       env.example.hbs
@@ -299,6 +300,25 @@ Constraints:
 - if the target app already has a proxy/middleware, merge manually
 - add public routes explicitly
 - keep proxy imports edge-safe
+
+### `AUTH_SETUP_HANDOFF.md`
+
+App-owner handoff document.
+
+What it does:
+
+- summarizes the authentication scaffold that was installed
+- lists the files added or updated
+- records setup decisions such as app name, provider, dashboard route, and proxy generation
+- identifies IT/IAM, deployment, app-team, and security-review follow-up items
+- documents required environment variables, redirect URIs, and validation steps
+
+Constraints:
+
+- the installer generates this file automatically
+- generated values should be reviewed before production use
+- unknown manual setup items should remain marked as `Open`
+- never add real provider secrets to this document
 
 ### `.env.example`
 
