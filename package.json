@@ -1,6 +1,6 @@
 {
   "name": "@curiousnwbldr/finance-command-center-auth",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": false,
   "type": "module",
   "description": "Reusable Okta/Auth.js starter kit for finance command-center style Next.js applications.",
@@ -42,11 +42,11 @@
     "provenance": true
   },
   "files": [
-  "dist",
-  "templates",
-  "README.md",
-  "SKILLS.md"
-],
+    "dist",
+    "templates",
+    "README.md",
+    "SKILLS.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
