@@ -1,6 +1,6 @@
 {
   "name": "@curiousnwbldr/finance-command-center-auth",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": false,
   "type": "module",
   "description": "Reusable Okta/Auth.js starter kit for finance command-center style Next.js applications.",
