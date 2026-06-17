@@ -4,20 +4,48 @@ Reusable Okta/Auth.js starter kit for Next.js App Router applications.
 
 This package extracts the reusable authentication pattern from Polaris without carrying over Polaris-specific SOX authorization, role catalogs, dashboards, agents, activity logging, or UI primitives. It is intended to give your team a consistent starting point for command-center style apps where users authenticate once through Okta and then land in a protected application shell.
 
-## What This Package Is
+## Quick Start
 
-This is a copy/install kit, not a hosted identity service.
+Generate authentication scaffolding for a Next.js App Router application:
 
-It gives another Next.js app the files needed to start using Auth.js/NextAuth with Okta:
+```bash
+pnpm dlx @curiousnwbldr/finance-command-center-auth install \
+  --target ./my-app \
+  --app-name "Finance Command Center" \
+  --provider okta
+```
 
-- an `auth.ts` configuration file
-- a login page
-- the Auth.js route handler
-- NextAuth session/JWT type augmentation
-- an optional `proxy.ts` route guard
-- an `.env.example` auth configuration block
+Or with npm:
 
-The generated files are deliberately light. They include extension hooks where the target app can connect its own user table, audit log, role model, or command-center profile service.
+```bash
+npx @curiousnwbldr/finance-command-center-auth install \
+  --target ./my-app \
+  --app-name "Finance Command Center" \
+  --provider okta
+```
+
+### Programmatic Usage
+
+The installer can also be imported as a library:
+
+```ts
+import { installAuthKit } from "@curiousnwbldr/finance-command-center-auth"
+
+await installAuthKit({
+  target: "./my-app",
+  appName: "Finance Command Center",
+  provider: "okta"
+})
+```
+
+### Peer Dependencies
+
+The target application is expected to use:
+
+```bash
+pnpm add next react react-dom next-auth
+```
+
 
 ## When To Use It
 
@@ -84,8 +112,8 @@ Important fields:
 
 - `bin.finance-command-center-auth`: primary CLI command exposed by the package.
 - `bin.command-center-auth`: compatibility CLI alias for shorter internal usage.
-- `dependencies.next-auth`: the generated app uses Auth.js/NextAuth.
-- `peerDependencies.next`, `react`, `react-dom`: the target app must already be a Next/React app.
+- `peerDependencies.next`, `next-auth`, `react`, `react-dom`: required by the generated application.
+- The package intentionally ships with no runtime dependencies.
 
 ### `tsconfig.json`
 
@@ -297,16 +325,17 @@ Constraints:
 
 The target app should have:
 
-- Next.js App Router
-- TypeScript
-- React
-- `next-auth`
-- a working `@/` alias, or manually adjust generated imports
+* Next.js App Router
+* TypeScript
+* React
+* React DOM
+* Auth.js / NextAuth
+* a working `@/` alias, or manually adjust generated imports
 
-Install dependency in the target app:
+Install required peer dependencies in the target app:
 
 ```bash
-pnpm add next-auth
+pnpm add next react react-dom next-auth
 ```
 
 If the target app does not use Tailwind-style utility classes, the generated login page will still work structurally, but it will need styling changes.
@@ -458,36 +487,38 @@ node dist/bin/install-auth-kit.js install \
   --force
 ```
 
-## Publishing A Verified Package
+## Publishing
 
-This package is configured for npm trusted publishing and provenance under:
+This package is published through npm Trusted Publishing and provenance.
+
+Example release:
+
+```bash
+npm version patch
+git push origin main --follow-tags
+
+Package:
 
 ```text
 @curiousnwbldr/finance-command-center-auth
 ```
 
-To publish it as a verified package:
+Publishing workflow:
 
-1. Confirm the npm scope `@curiousnwbldr` is owned by the right user or organization.
-2. In npm package settings, configure GitHub Actions as the trusted publisher for this repository.
-3. Use workflow file `publish.yml`.
-4. Create and push a version tag, for example `v0.1.0`.
-5. The GitHub workflow builds the package and runs `npm publish`.
-
-The package uses:
-
-```json
-{
-  "publishConfig": {
-    "access": "restricted",
-    "provenance": true
-  }
-}
+```text
+.github/workflows/publish-auth.yml
 ```
 
-Use `"access": "public"` instead if this should be installable outside the npm organization. For private/restricted packages, consuming teams need access to the npm scope and must authenticate their package manager to npm.
+Release process:
 
-After publishing, consumers can verify registry signatures and attestations with:
+```bash
+npm version patch
+git push origin main --follow-tags
+```
+
+GitHub Actions builds the package and publishes it automatically using npm Trusted Publishing.
+
+Consumers can verify provenance and registry attestations with:
 
 ```bash
 npm audit signatures
@@ -617,4 +648,14 @@ Then manually merge the generated route-guard logic into the target app’s exis
 
 ## Current Status
 
-This is a starter kit scaffold. It has been build-tested and smoke-tested locally, but it should still go through normal security review before being used broadly across production apps.
+This package has been:
+
+- build-tested
+- type-checked
+- published through npm Trusted Publishing
+- validated as a CLI package
+- validated as a library package
+- smoke-tested against a clean Next.js target folder
+- reviewed for shipped runtime dependencies
+
+Application-specific security review is still recommended before production deployment.
