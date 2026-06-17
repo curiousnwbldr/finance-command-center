@@ -42,10 +42,11 @@
     "provenance": true
   },
   "files": [
-    "dist",
-    "templates",
-    "README.md"
-  ],
+  "dist",
+  "templates",
+  "README.md",
+  "SKILLS.md"
+],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
